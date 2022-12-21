@@ -22,7 +22,12 @@ class VoteController extends Controller
      */
     public function index(Request $request)
     {
+        $queryName = ($gameId = $request->input('uid')) !== null
+            ? User::where('game_id', $gameId)->value('name')
+            : $request->input('user', '');
+
         return view('vote::index', [
+            'name' => $queryName,
             'user' => $request->user(),
             'request' => $request,
             'sites' => Site::enabled()->with('rewards')->get(),
@@ -98,17 +103,17 @@ class VoteController extends Controller
         $reward = $site->getRandomReward();
 
         if ($reward !== null) {
-            $site->votes()->create([
+            $vote = $site->votes()->create([
                 'user_id' => $user->id,
                 'reward_id' => $reward->id,
             ]);
 
-            $reward->giveTo($user);
+            $reward->dispatch($vote);
         }
 
         return response()->json([
             'message' => trans('vote::messages.success', [
-                'reward' => $reward->name,
+                'reward' => $reward?->name ?? trans('messages.unknown'),
             ]),
         ]);
     }

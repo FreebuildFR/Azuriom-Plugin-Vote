@@ -16,7 +16,7 @@
                     <div class="col-md-6 col-lg-4">
                         <div class="mb-3">
                             <input type="text" id="stepNameInput" name="name" class="form-control"
-                                   value="{{ $request->input('user') }}"
+                                   value="{{ $name }}"
                                    placeholder="{{ trans('messages.fields.name') }}" required>
                         </div>
 

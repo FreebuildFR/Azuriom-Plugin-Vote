@@ -101,6 +101,13 @@ class VoteVerifier
         return $this;
     }
 
+    public function verifyByCallback(callable $verification)
+    {
+        $this->verificationMethod = $verification;
+
+        return $this;
+    }
+
     public function verifyByJson(string $key, $exceptedValue)
     {
         $this->verificationMethod = function (Response $response) use ($key, $exceptedValue) {
@@ -193,7 +200,7 @@ class VoteVerifier
 
                 $response = Http::get($url);
 
-                if ($verificationMethod($response)) {
+                if ($verificationMethod($response, $user)) {
                     return true;
                 }
             }

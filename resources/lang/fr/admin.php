@@ -57,7 +57,7 @@ return [
         'require_online' => 'Exécuter les commandes lorsque l\'utilisateur est en ligne sur le serveur (uniquement disponible avec AzLink)',
         'enable' => 'Activer la récompense',
 
-        'commands' => 'Vous pouvez utiliser <code>{player}</code> pour utiliser le nom du joueur et <code>{reward}</code> pour utiliser le nom de la récompense. La commande ne doit pas contenir de <code>/</code> au début.',
+        'commands' => 'Vous pouvez utiliser <code>{player}</code> pour utiliser le nom du joueur, <code>{reward}</code> pour le nom de la récompense et <code>{site}</code> pour le nom du site. La commande ne doit pas contenir de <code>/</code> au début.',
     ],
 
     'votes' => [

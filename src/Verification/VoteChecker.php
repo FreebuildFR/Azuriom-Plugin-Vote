@@ -5,6 +5,7 @@ namespace Azuriom\Plugin\Vote\Verification;
 use Azuriom\Models\User;
 use Azuriom\Plugin\Vote\Models\Site;
 use Carbon\Carbon;
+use Illuminate\Http\Client\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
@@ -108,6 +109,19 @@ class VoteChecker
             ->setApiUrl('https://www.liste-serveur.fr/api/hasVoted/{server}/{ip}')
             ->requireKey('secret')
             ->verifyByJson('hasVoted', true));
+
+        $this->register(VoteVerifier::for('minecraft-italia.it/')
+            ->setApiUrl('https://api.minecraft-italia.it/v6/server-info/{server_name}?key={server}')
+            ->requireKey('api_key')
+            ->verifyByCallback(function (Response $response, User $user) {
+                $votes = collect($response->json('userVotes', []));
+
+                if ($user->game_id === null) {
+                    return $votes->contains('minecraftNickname', $user->name);
+                }
+
+                return $votes->contains('minecraftUUID', $user->game_id);
+            }));
 
         $this->register(VoteVerifier::for('minecraft-server.eu')
             ->setApiUrl('https://minecraft-server.eu/api/v1/?object=votes&element=claim&key={server}&username={name}')

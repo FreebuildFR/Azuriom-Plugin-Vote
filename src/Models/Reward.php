@@ -6,7 +6,6 @@ use Azuriom\Models\Server;
 use Azuriom\Models\Traits\HasImage;
 use Azuriom\Models\Traits\HasTablePrefix;
 use Azuriom\Models\Traits\Loggable;
-use Azuriom\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -73,8 +72,10 @@ class Reward extends Model
         return $this->belongsToMany(Server::class, 'vote_reward_server');
     }
 
-    public function giveTo(User $user)
+    public function dispatch(Vote $vote)
     {
+        $user = $vote->user;
+
         if ($this->money > 0) {
             $user->addMoney($this->money);
         }
@@ -89,9 +90,9 @@ class Reward extends Model
             return;
         }
 
-        $commands = array_map(function (string $command) {
-            return str_replace('{reward}', $this->name, $command);
-        }, $commands);
+        $commands = array_map(fn (string $command) => str_replace([
+            '{reward}', '{site}',
+        ], [$this->name, $vote->site->name], $command), $commands);
 
         foreach ($this->servers as $server) {
             $server->bridge()->sendCommands($commands, $user, $this->need_online);
