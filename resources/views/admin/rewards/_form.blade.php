@@ -81,6 +81,38 @@
     <small class="form-text">@lang('vote::admin.rewards.commands')</small>
 </div>
 
+@if($cron)
+    <div class="mb-3" v-scope='{ rewards: @json($reward->monthly_rewards ?? ['']) }'>
+        <label class="form-label">{{ trans('vote::admin.rewards.monthly') }}</label>
+
+        <div class="row gx-3">
+            <div v-for="(value, index) in rewards" class="col-md-4 mb-2" :key="index">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        #
+                    </span>
+                    <input type="number" class="form-control" name="monthly_rewards[]" v-model="rewards[index]" :value="value" min="1" max="50">
+                    <button @click="rewards.splice(index, 1)" class="btn btn-outline-danger" type="button">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="my-1">
+            <button @click="rewards.push('')" type="button" class="btn btn-sm btn-success">
+                <i class="bi bi-plus-lg"></i> {{ trans('messages.actions.add') }}
+            </button>
+        </div>
+
+        <small class="form-text">@lang('vote::admin.rewards.monthly_info')</small>
+    </div>
+@else
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> @lang('vote::admin.rewards.cron')
+    </div>
+@endif
+
 <div class="mb-3 form-check form-switch">
     <input type="checkbox" class="form-check-input" id="enableSwitch" name="is_enabled" @checked(old('is_enabled', $reward->is_enabled ?? true))>
     <label class="form-check-label" for="enableSwitch">{{ trans('vote::admin.rewards.enable') }}</label>

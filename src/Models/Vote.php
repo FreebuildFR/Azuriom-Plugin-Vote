@@ -73,13 +73,13 @@ class Vote extends Model
         });
     }
 
-    public static function getRawTopVoters(Carbon $fromDate, Carbon $toDate = null)
+    public static function getRawTopVoters(Carbon $fromDate, Carbon $toDate = null, int $max = null)
     {
         return self::select(['user_id', DB::raw('count(*) as count')])
             ->whereBetween('created_at', [$fromDate, $toDate ?? now()])
             ->groupBy('user_id')
             ->orderByDesc('count')
-            ->take(setting('vote.top-players-count', 10))
+            ->take($max ?? setting('vote.top-players-count', 10))
             ->get();
     }
 }

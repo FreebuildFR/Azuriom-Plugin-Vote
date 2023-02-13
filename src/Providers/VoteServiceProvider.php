@@ -5,8 +5,10 @@ namespace Azuriom\Plugin\Vote\Providers;
 use Azuriom\Extensions\Plugin\BasePluginServiceProvider;
 use Azuriom\Models\ActionLog;
 use Azuriom\Models\Permission;
+use Azuriom\Plugin\Vote\Commands\MonthlyRewardsCommand;
 use Azuriom\Plugin\Vote\Models\Reward;
 use Azuriom\Plugin\Vote\Models\Site;
+use Illuminate\Console\Scheduling\Schedule;
 
 class VoteServiceProvider extends BasePluginServiceProvider
 {
@@ -45,6 +47,21 @@ class VoteServiceProvider extends BasePluginServiceProvider
             Reward::class,
             Site::class,
         ], 'vote::admin.logs');
+
+        $this->registerSchedule();
+
+        $this->commands(MonthlyRewardsCommand::class);
+    }
+
+    /**
+     * Define the application's command schedule.
+     *
+     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
+     * @return void
+     */
+    protected function schedule(Schedule $schedule)
+    {
+        $schedule->command('vote:rewards')->monthly();
     }
 
     /**

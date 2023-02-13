@@ -58,6 +58,9 @@ return [
         'enable' => 'Activer la récompense',
 
         'commands' => 'Vous pouvez utiliser <code>{player}</code> pour utiliser le nom du joueur, <code>{reward}</code> pour le nom de la récompense et <code>{site}</code> pour le nom du site. La commande ne doit pas contenir de <code>/</code> au début.',
+        'monthly' => 'Position du classement des utilisateurs à qui donner cette récompense à la fin du mois',
+        'monthly_info' => 'Donner automatiquement, à la fin du mois, cette récompense aux utilisateurs aux positions indiquées dans le classement des meilleurs voteurs.',
+        'cron' => 'Vous devez configurer les tâches CRON pour pouvoir utiliser les récompenses automatiques à la fin du mois.',
     ],
 
     'votes' => [

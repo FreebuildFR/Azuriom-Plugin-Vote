@@ -58,6 +58,9 @@ return [
         'enable' => 'Enable the reward',
 
         'commands' => 'You can use <code>{player}</code> to use the player name, <code>{reward}</code> for the reward name and <code>{site}</code> for the vote website. The command must not start with <code>/</code>.',
+        'monthly' => 'Ranking of users to give this reward to at the end of the month',
+        'monthly_info' => 'Automatically give this reward, at the end of the month, to the users at the given positions in the best voters ranking.',
+        'cron' => 'You must set up CRON tasks to use automatic rewards at the end of the month.',
     ],
 
     'votes' => [

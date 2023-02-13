@@ -6,6 +6,7 @@ use Azuriom\Models\Server;
 use Azuriom\Models\Traits\HasImage;
 use Azuriom\Models\Traits\HasTablePrefix;
 use Azuriom\Models\Traits\Loggable;
+use Azuriom\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,7 +17,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property float $chances
  * @property int|null $money
  * @property bool $need_online
- * @property array $commands
+ * @property string[] $commands
+ * @property int[] $monthly_rewards
  * @property bool $is_enabled
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
@@ -44,7 +46,7 @@ class Reward extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'image', 'chances', 'money', 'commands', 'need_online', 'is_enabled',
+        'name', 'image', 'chances', 'money', 'commands', 'monthly_rewards', 'need_online', 'is_enabled',
     ];
 
     /**
@@ -54,6 +56,7 @@ class Reward extends Model
      */
     protected $casts = [
         'commands' => 'array',
+        'monthly_rewards' => 'array',
         'is_enabled' => 'boolean',
     ];
 
@@ -72,9 +75,10 @@ class Reward extends Model
         return $this->belongsToMany(Server::class, 'vote_reward_server');
     }
 
-    public function dispatch(Vote $vote)
+    public function dispatch(User|Vote $target)
     {
-        $user = $vote->user;
+        $user = $target instanceof User ? $target : $target->user;
+        $siteName = $target instanceof Vote ? $target->site->name : '?';
 
         if ($this->money > 0) {
             $user->addMoney($this->money);
@@ -92,7 +96,7 @@ class Reward extends Model
 
         $commands = array_map(fn (string $command) => str_replace([
             '{reward}', '{site}',
-        ], [$this->name, $vote->site->name], $command), $commands);
+        ], [$this->name, $siteName], $command), $commands);
 
         foreach ($this->servers as $server) {
             $server->bridge()->sendCommands($commands, $user, $this->need_online);

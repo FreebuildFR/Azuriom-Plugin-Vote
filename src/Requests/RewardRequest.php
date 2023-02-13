@@ -34,6 +34,7 @@ class RewardRequest extends FormRequest
             'money' => ['nullable', 'numeric', 'min:0'],
             'need_online' => ['filled', 'boolean'],
             'commands' => ['sometimes', 'nullable', 'array'],
+            'monthly_rewards' => ['sometimes', 'nullable', 'array'],
             'is_enabled' => ['filled', 'boolean'],
         ];
     }
@@ -48,8 +49,10 @@ class RewardRequest extends FormRequest
     public function validated($key = null, $default = null)
     {
         $validated = parent::validated();
+        $positions = array_filter(Arr::get($validated, 'monthly_rewards', []));
 
         $validated['commands'] = array_filter(Arr::get($validated, 'commands', []));
+        $validated['monthly_rewards'] = array_map(fn ($val) => (int) $val, $positions);
 
         if (Arr::get($validated, 'money') === null) {
             $validated['money'] = 0;

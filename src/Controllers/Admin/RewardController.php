@@ -6,6 +6,7 @@ use Azuriom\Http\Controllers\Controller;
 use Azuriom\Models\Server;
 use Azuriom\Plugin\Vote\Models\Reward;
 use Azuriom\Plugin\Vote\Requests\RewardRequest;
+use Carbon\Carbon;
 
 class RewardController extends Controller
 {
@@ -30,6 +31,7 @@ class RewardController extends Controller
     {
         return view('vote::admin.rewards.create', [
             'servers' => Server::executable()->get(),
+            'cron' => $this->hasCron(),
         ]);
     }
 
@@ -64,6 +66,7 @@ class RewardController extends Controller
         return view('vote::admin.rewards.edit', [
             'reward' => $reward->load('servers'),
             'servers' => Server::executable()->get(),
+            'cron' => $this->hasCron(),
         ]);
     }
 
@@ -102,5 +105,12 @@ class RewardController extends Controller
 
         return redirect()->route('vote.admin.rewards.index')
             ->with('success', trans('messages.status.success'));
+    }
+
+    protected function hasCron()
+    {
+        $last = setting('schedule.last');
+
+        return $last !== null && Carbon::parse($last)->isAfter(now()->subHour());
     }
 }
