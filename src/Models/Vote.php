@@ -3,6 +3,7 @@
 namespace Azuriom\Plugin\Vote\Models;
 
 use Azuriom\Models\Traits\HasTablePrefix;
+use Azuriom\Models\Traits\Searchable;
 use Azuriom\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\DB;
 class Vote extends Model
 {
     use HasTablePrefix;
+    use Searchable;
 
     /**
      * The table prefix associated with the model.
@@ -40,6 +42,15 @@ class Vote extends Model
      */
     protected $fillable = [
         'user_id', 'reward_id',
+    ];
+
+    /**
+     * The attributes that can be search for.
+     *
+     * @var array
+     */
+    protected $searchable = [
+        'site.*', 'reward.*', 'user.name',
     ];
 
     public function user()

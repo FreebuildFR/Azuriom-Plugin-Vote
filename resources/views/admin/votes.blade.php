@@ -17,7 +17,7 @@
 
                         <div class="col-auto">
                             <div class="stat text-primary">
-                                <i class="bi bi-path-check"></i>
+                                <i class="bi bi-calendar"></i>
                             </div>
                         </div>
                     </div>
@@ -38,7 +38,7 @@
 
                         <div class="col-auto">
                             <div class="stat text-primary">
-                                <i class="bi bi-path-check"></i>
+                                <i class="bi bi-calendar-month"></i>
                             </div>
                         </div>
                     </div>
@@ -59,7 +59,7 @@
 
                         <div class="col-auto">
                             <div class="stat text-primary">
-                                <i class="bi bi-path-check"></i>
+                                <i class="bi bi-calendar-week"></i>
                             </div>
                         </div>
                     </div>
@@ -80,7 +80,7 @@
 
                         <div class="col-auto">
                             <div class="stat text-primary">
-                                <i class="bi bi-path-check"></i>
+                                <i class="bi bi-calendar-day"></i>
                             </div>
                         </div>
                     </div>
@@ -88,7 +88,65 @@
                 </div>
             </div>
         </div>
+    </div>
 
+    <form class="row row-cols-lg-auto g-3 align-items-center" action="{{ route('vote.admin.votes.index') }}" method="GET">
+        <div class="mb-3">
+            <label for="searchInput" class="visually-hidden">
+                {{ trans('messages.actions.search') }}
+            </label>
+
+            <div class="input-group">
+                <input type="text" class="form-control" id="searchInput" name="search" value="{{ $search ?? '' }}" placeholder="{{ trans('messages.actions.search') }}">
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div class="card shadow mb-4">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">{{ trans('messages.fields.user') }}</th>
+                    <th scope="col">{{ trans('vote::messages.fields.site') }}</th>
+                    <th scope="col">{{ trans('vote::messages.fields.reward') }}</th>
+                    <th scope="col">{{ trans('messages.fields.date') }}</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                @foreach($votes as $vote)
+                    <tr>
+                        <th scope="row">{{ $vote->id }}</th>
+                        <td>
+                            <a href="{{ route('admin.users.edit', $vote->user) }}">
+                                {{ $vote->user->name }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ route('vote.admin.sites.edit', $vote->site) }}">
+                                {{ $vote->site->name }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ route('vote.admin.rewards.edit', $vote->reward) }}">
+                                {{ $vote->reward->name }}
+                            </a>
+                        </td>
+                        <td>{{ format_date_compact($vote->created_at) }}</td>
+                    </tr>
+                @endforeach
+
+                </tbody>
+            </table>
+        </div>
+
+        {{ $votes->withQueryString()->links() }}
     </div>
 
     <div class="card shadow mb-4">
@@ -99,9 +157,12 @@
         </div>
         <div class="card-body">
             <ul class="nav nav-pills mb-3" id="voteTabs" role="tablist">
-                @foreach($votes as $voteDate => $userVotes)
+                @foreach($topVotes as $voteDate => $userVotes)
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link @if($voteDate === $now) active @endif" id="voteTab{{ $loop->index }}" data-bs-toggle="tab" href="#votesPane{{ $loop->index }}" role="tab" aria-controls="votesPane{{ $loop->index }}" aria-selected="{{ $voteDate === $now ? 'true' : 'false' }}">
+                        <a class="nav-link @if($voteDate === $now) active @endif" id="voteTab{{ $loop->index }}"
+                           data-bs-toggle="tab" href="#votesPane{{ $loop->index }}" role="tab"
+                           aria-controls="votesPane{{ $loop->index }}"
+                           aria-selected="{{ $voteDate === $now ? 'true' : 'false' }}">
                             {{ $voteDate }}
                         </a>
                     </li>
@@ -109,8 +170,9 @@
             </ul>
 
             <div class="tab-content">
-                @foreach($votes as $voteDate => $userVotes)
-                    <div class="tab-pane fade @if($voteDate === $now) show active @endif" id="votesPane{{ $loop->index }}" aria-labelledby="votesTab{{ $loop->index }}">
+                @foreach($topVotes as $voteDate => $userVotes)
+                    <div class="tab-pane fade @if($voteDate === $now) show active @endif"
+                         id="votesPane{{ $loop->index }}" aria-labelledby="votesTab{{ $loop->index }}">
                         @if(! $userVotes->isEmpty())
                             <table class="table">
                                 <thead>
@@ -154,7 +216,8 @@
                 </div>
                 <div class="card-body pt-2 pb-3">
                     <div class="tab-content mb-3">
-                        <div class="tab-pane fade show active" id="monthlyChart" role="tabpanel" aria-labelledby="monthlyChartTab">
+                        <div class="tab-pane fade show active" id="monthlyChart" role="tabpanel"
+                             aria-labelledby="monthlyChartTab">
                             <div class="chart">
                                 <canvas id="votesPerMonthsChart"></canvas>
                             </div>
@@ -168,12 +231,14 @@
 
                     <ul class="nav nav-pills" id="pills-tab" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <a class="nav-link active" id="monthlyChartTab" data-bs-toggle="pill" href="#monthlyChart" role="tab" aria-controls="monthlyChart" aria-selected="true">
+                            <a class="nav-link active" id="monthlyChartTab" data-bs-toggle="pill" href="#monthlyChart"
+                               role="tab" aria-controls="monthlyChart" aria-selected="true">
                                 {{ trans('messages.range.months') }}
                             </a>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <a class="nav-link" id="dailyChartTab" data-bs-toggle="pill" href="#dailyChart" role="tab" aria-controls="dailyChart" aria-selected="false">
+                            <a class="nav-link" id="dailyChartTab" data-bs-toggle="pill" href="#dailyChart" role="tab"
+                               aria-controls="dailyChart" aria-selected="false">
                                 {{ trans('messages.range.days') }}
                             </a>
                         </li>

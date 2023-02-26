@@ -6,6 +6,7 @@ use Azuriom\Models\Server;
 use Azuriom\Models\Traits\HasImage;
 use Azuriom\Models\Traits\HasTablePrefix;
 use Azuriom\Models\Traits\Loggable;
+use Azuriom\Models\Traits\Searchable;
 use Azuriom\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -32,6 +33,7 @@ class Reward extends Model
     use HasImage;
     use HasTablePrefix;
     use Loggable;
+    use Searchable;
 
     /**
      * The table prefix associated with the model.
@@ -58,6 +60,15 @@ class Reward extends Model
         'commands' => 'array',
         'monthly_rewards' => 'array',
         'is_enabled' => 'boolean',
+    ];
+
+    /**
+     * The attributes that can be search for.
+     *
+     * @var array
+     */
+    protected $searchable = [
+        'name',
     ];
 
     public function sites()

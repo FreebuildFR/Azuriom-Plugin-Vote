@@ -10,10 +10,12 @@ return [
     ],
 
     'fields' => [
-        'servers' => 'Serveurs',
         'chances' => 'Chances',
-        'rewards' => 'Récompenses',
         'commands' => 'Commandes',
+        'reward' => 'Récompense',
+        'rewards' => 'Récompenses',
+        'servers' => 'Serveurs',
+        'site' => 'Site',
         'votes' => 'Votes',
     ],
 

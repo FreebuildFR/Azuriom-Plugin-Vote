@@ -4,6 +4,7 @@ namespace Azuriom\Plugin\Vote\Models;
 
 use Azuriom\Models\Traits\HasTablePrefix;
 use Azuriom\Models\Traits\Loggable;
+use Azuriom\Models\Traits\Searchable;
 use Azuriom\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -30,6 +31,7 @@ class Site extends Model
 {
     use HasTablePrefix;
     use Loggable;
+    use Searchable;
 
     /**
      * The table prefix associated with the model.
@@ -56,6 +58,15 @@ class Site extends Model
         'need_online' => 'boolean',
         'has_verification' => 'boolean',
         'is_enabled' => 'boolean',
+    ];
+
+    /**
+     * The attributes that can be search for.
+     *
+     * @var array
+     */
+    protected $searchable = [
+        'name',
     ];
 
     public function rewards()

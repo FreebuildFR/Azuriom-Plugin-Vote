@@ -48,7 +48,9 @@ class VoteServiceProvider extends BasePluginServiceProvider
             Site::class,
         ], 'vote::admin.logs');
 
-        $this->registerSchedule();
+        if (method_exists($this, 'registerSchedule')) {
+            $this->registerSchedule();
+        }
 
         $this->commands(MonthlyRewardsCommand::class);
     }

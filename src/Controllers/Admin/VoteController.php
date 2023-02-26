@@ -6,28 +6,32 @@ use Azuriom\Http\Controllers\Controller;
 use Azuriom\Models\User;
 use Azuriom\Plugin\Vote\Models\Vote;
 use Azuriom\Support\Charts;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 
 class VoteController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
+     * @param  \Illuminate\Http\Request
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $votes = collect();
+        $search = $request->input('search');
+        $topVotes = collect();
         $date = now()->startOfMonth()->subMonths(6);
 
         while ($date->addMonth()->isPast()) {
-            $votes->put($date->format('m/Y'), Vote::getRawTopVoters($date, $date->clone()->endOfMonth()));
+            $topVotes->put($date->format('m/Y'), Vote::getRawTopVoters($date, $date->clone()->endOfMonth()));
         }
 
-        $users = User::findMany($votes->flatMap(function ($votes) {
+        $users = User::findMany($topVotes->flatMap(function ($votes) {
             return $votes->pluck('user_id');
         })->unique())->keyBy('id');
 
-        $votes = $votes->map(function ($voteValues) use ($users) {
+        $topVotes = $topVotes->map(function ($voteValues) use ($users) {
             return $voteValues->mapWithKeys(function ($vote, $position) use ($users) {
                 return [
                     $position + 1 => (object) [
@@ -38,9 +42,15 @@ class VoteController extends Controller
             });
         });
 
-        return view('vote::admin.votes', [
-            'votes' => $votes,
+        $votes = Vote::with(['user', 'reward', 'site'])
+            ->when($search, fn (Builder $query) => $query->search($search))
+            ->latest()
+            ->paginate();
 
+        return view('vote::admin.votes', [
+            'search' => $search,
+            'topVotes' => $topVotes,
+            'votes' => $votes,
             'votesCount' => Vote::count(),
             'votesCountMonth' => Vote::where('created_at', '>', now()->startOfMonth())->count(),
             'votesCountWeek' => Vote::where('created_at', '>', now()->startOfWeek())->count(),
