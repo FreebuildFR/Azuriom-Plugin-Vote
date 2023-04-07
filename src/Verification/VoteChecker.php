@@ -189,13 +189,20 @@ class VoteChecker
             ->verifyByValue('1'));
 
         $this->register(VoteVerifier::for('gtop100.com')
-            ->retrieveKeyByRegex('/^gtop100\.com\/topsites\/[\w-]+\/sitedetails\/[\w-]+\-(\d+)/')
+            ->requireKey('api_key')
             ->verifyByPingback(function (Request $request) {
-                abort_if(! in_array($request->ip(), ['198.148.82.98', '198.148.82.99'], true), 403);
+                $key = $request->input('pingbackkey');
+
+                abort_if($key === null, 401);
+                abort_if(! Site::where('verification_key', $key)->exists(), 403);
 
                 if ($request->input('Successful') === '0') {
                     Cache::put("vote.sites.gtop100.com.{$request->input('VoterIP')}", true, now()->addMinutes(5));
+
+                    return response()->noContent();
                 }
+
+                return response()->noContent(403);
             }));
     }
 
