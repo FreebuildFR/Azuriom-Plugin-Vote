@@ -110,6 +110,11 @@ class VoteChecker
             ->requireKey('secret')
             ->verifyByJson('hasVoted', true));
 
+        $this->register(VoteVerifier::for('serveurliste.com')
+            ->setApiUrl('https://serveurliste.com/api/vote?ip_address={ip}&api_token={server}')
+            ->requireKey('api_key')
+            ->verifyByJson('data.voted', true));
+
         $this->register(VoteVerifier::for('minecraft-italia.it/')
             ->setApiUrl('https://api.minecraft-italia.it/v6/server-info/{server_name}?key={server}')
             ->requireKey('api_key')
