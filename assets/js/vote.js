@@ -36,10 +36,10 @@ function updateVoteLink(link) {
     }
 
     if (nextVoteTime > Date.now()) {
-        link.querySelector('.vote-timer').innerHTML = getTimeDifference(nextVoteTime);
+        link.querySelector('.vote-timer').innerText = getTimeDifference(nextVoteTime);
     } else {
         link.classList.remove('disabled');
-        link.querySelector('.vote-timer').innerHTML = '';
+        link.querySelector('.vote-timer').innerText = '';
         link.removeAttribute('data-vote-time');
     }
 }

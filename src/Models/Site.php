@@ -81,13 +81,12 @@ class Site extends Model
 
     public function getRandomReward()
     {
-        $total = $this->rewards->sum('chances');
-        $random = random_int(0, $total);
-
+        // Multiply to support decimal chances
+        $random = random_int(1, $this->rewards->sum('chances') * 1000);
         $sum = 0;
 
         foreach ($this->rewards as $reward) {
-            $sum += $reward->chances;
+            $sum += $reward->chances * 1000;
 
             if ($sum >= $random) {
                 return $reward;

@@ -129,14 +129,22 @@
                             </a>
                         </td>
                         <td>
-                            <a href="{{ route('vote.admin.sites.edit', $vote->site) }}">
-                                {{ $vote->site->name }}
-                            </a>
+                            @if($vote->site !== null)
+                                <a href="{{ route('vote.admin.sites.edit', $vote->site) }}">
+                                    {{ $vote->site->name }}
+                                </a>
+                            @else
+                                #{{ $vote->site_id }}
+                            @endif
                         </td>
                         <td>
-                            <a href="{{ route('vote.admin.rewards.edit', $vote->reward) }}">
-                                {{ $vote->reward->name }}
-                            </a>
+                            @if($vote->reward !== null)
+                                <a href="{{ route('vote.admin.rewards.edit', $vote->reward) }}">
+                                    {{ $vote->reward->name }}
+                                </a>
+                            @else
+                                #{{ $vote->reward_id }}
+                            @endif
                         </td>
                         <td>{{ format_date_compact($vote->created_at) }}</td>
                     </tr>
