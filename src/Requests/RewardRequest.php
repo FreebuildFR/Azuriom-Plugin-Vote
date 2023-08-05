@@ -4,27 +4,26 @@ namespace Azuriom\Plugin\Vote\Requests;
 
 use Azuriom\Http\Requests\Traits\ConvertCheckbox;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Arr;
 
 class RewardRequest extends FormRequest
 {
     use ConvertCheckbox;
 
     /**
-     * The checkboxes attributes.
+     * The attributes represented by checkboxes.
      *
-     * @var array
+     * @var array<int, string>
      */
-    protected $checkboxes = [
+    protected array $checkboxes = [
         'need_online', 'is_enabled',
     ];
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:50'],
@@ -40,24 +39,21 @@ class RewardRequest extends FormRequest
     }
 
     /**
-     * Get the validated data from the request.
-     *
-     * @param  mixed|null  $key
-     * @param  mixed|null  $default
-     * @return array
+     * Prepare the data for validation.
      */
-    public function validated($key = null, $default = null)
+    protected function prepareForValidation(): void
     {
-        $validated = parent::validated();
-        $positions = array_filter(Arr::get($validated, 'monthly_rewards', []));
+        $this->mergeCheckboxes();
 
-        $validated['commands'] = array_filter(Arr::get($validated, 'commands', []));
-        $validated['monthly_rewards'] = array_map(fn ($val) => (int) $val, $positions);
-
-        if (Arr::get($validated, 'money') === null) {
-            $validated['money'] = 0;
+        if (! $this->filled('money')) {
+            $this->merge(['money' => 0]);
         }
 
-        return $validated;
+        $rewards = array_filter($this->input('monthly_rewards', []));
+
+        $this->merge([
+            'commands' => array_filter($this->input('commands', [])),
+            'monthly_rewards' => array_map(fn ($val) => (int) $val, $rewards),
+        ]);
     }
 }

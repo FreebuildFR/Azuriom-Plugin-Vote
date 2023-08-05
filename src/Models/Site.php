@@ -6,6 +6,7 @@ use Azuriom\Models\Traits\HasTablePrefix;
 use Azuriom\Models\Traits\Loggable;
 use Azuriom\Models\Traits\Searchable;
 use Azuriom\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -35,15 +36,13 @@ class Site extends Model
 
     /**
      * The table prefix associated with the model.
-     *
-     * @var string
      */
-    protected $prefix = 'vote_';
+    protected string $prefix = 'vote_';
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $fillable = [
         'name', 'url', 'vote_delay', 'verification_key', 'has_verification', 'is_enabled',
@@ -52,7 +51,7 @@ class Site extends Model
     /**
      * The attributes that should be cast to native types.
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $casts = [
         'need_online' => 'boolean',
@@ -61,11 +60,11 @@ class Site extends Model
     ];
 
     /**
-     * The attributes that can be search for.
+     * The attributes that can be used for search.
      *
-     * @var array
+     * @var array<int, string>
      */
-    protected $searchable = [
+    protected array $searchable = [
         'name',
     ];
 
@@ -79,7 +78,7 @@ class Site extends Model
         return $this->hasMany(Vote::class);
     }
 
-    public function getRandomReward()
+    public function getRandomReward(): ?Reward
     {
         // Multiply to support decimal chances
         $random = random_int(1, $this->rewards->sum('chances') * 1000);
@@ -96,7 +95,7 @@ class Site extends Model
         return $this->rewards->first();
     }
 
-    public function getNextVoteTime(User $user, Request|string $ip)
+    public function getNextVoteTime(User $user, Request|string $ip): ?Carbon
     {
         if ($ip instanceof Request) {
             $ip = $ip->ip();
@@ -131,12 +130,9 @@ class Site extends Model
 
     /**
      * Scope a query to only include enabled vote sites.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeEnabled(Builder $query)
+    public function scopeEnabled(Builder $query): void
     {
-        return $query->where('is_enabled', true);
+        $query->where('is_enabled', true);
     }
 }

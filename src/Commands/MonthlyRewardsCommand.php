@@ -25,12 +25,8 @@ class MonthlyRewardsCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
-     *
-     * @throws \Exception
      */
-    public function handle()
+    public function handle(): void
     {
         $rewards = Reward::all();
         $now = now()->subHour();
@@ -54,7 +50,5 @@ class MonthlyRewardsCommand extends Command
                 $this->info('Dispatching reward '.$reward->name.' to user #'.$user->id);
             }
         }
-
-        return 0;
     }
 }

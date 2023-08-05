@@ -32,7 +32,7 @@ class VoteVerifier
     /**
      * The method to handle websites pingback.
      */
-    private Closure|null $pingbackCallback = null;
+    private ?Closure $pingbackCallback = null;
 
     /**
      * The method to retrieve the server id from the vote url.
@@ -46,29 +46,23 @@ class VoteVerifier
 
     /**
      * Create a new VoteVerifier instance for the following domain (without http(s) or www).
-     *
-     * @param  string  $siteDomain
-     * @return \Azuriom\Plugin\Vote\Verification\VoteVerifier
      */
-    public static function for(string $siteDomain)
+    public static function for(string $siteDomain): self
     {
         return new self($siteDomain);
     }
 
     /**
      * Set the API verification url for this vote site.
-     *
-     * @param  string  $apiUrl
-     * @return \Azuriom\Plugin\Vote\Verification\VoteVerifier
      */
-    public function setApiUrl(string $apiUrl)
+    public function setApiUrl(string $apiUrl): self
     {
         $this->apiUrl = $apiUrl;
 
         return $this;
     }
 
-    public function retrieveKeyByRegex(string $regex, int $index = 1)
+    public function retrieveKeyByRegex(string $regex, int $index = 1): self
     {
         $this->retrieveKeyMethod = function ($url) use ($regex, $index) {
             $url = str_replace(['http://', 'https://'], '', $url);
@@ -87,28 +81,28 @@ class VoteVerifier
         return $this;
     }
 
-    public function retrieveKeyByDynamically(Closure $method)
+    public function retrieveKeyByDynamically(Closure $method): self
     {
         $this->retrieveKeyMethod = $method;
 
         return $this;
     }
 
-    public function requireKey(string $type)
+    public function requireKey(string $type): self
     {
         $this->retrieveKeyMethod = $type;
 
         return $this;
     }
 
-    public function verifyByCallback(callable $verification)
+    public function verifyByCallback(callable $verification): self
     {
         $this->verificationMethod = $verification;
 
         return $this;
     }
 
-    public function verifyByJson(string $key, $exceptedValue)
+    public function verifyByJson(string $key, $exceptedValue): self
     {
         $this->verificationMethod = function (Response $response) use ($key, $exceptedValue) {
             $json = $response->json();
@@ -125,7 +119,7 @@ class VoteVerifier
         return $this;
     }
 
-    public function verifyByValue(string $value)
+    public function verifyByValue(string $value): self
     {
         $this->verificationMethod = function (Response $response) use ($value) {
             return $response->body() === $value;
@@ -134,7 +128,7 @@ class VoteVerifier
         return $this;
     }
 
-    public function verifyByDifferentValue(string $value)
+    public function verifyByDifferentValue(string $value): self
     {
         $this->verificationMethod = function (Response $response) use ($value) {
             return $response->body() !== $value;
@@ -143,7 +137,7 @@ class VoteVerifier
         return $this;
     }
 
-    public function verifyByPingback(Closure $callback)
+    public function verifyByPingback(Closure $callback): self
     {
         $this->pingbackCallback = $callback;
 
@@ -161,12 +155,12 @@ class VoteVerifier
         return ($this->pingbackCallback)($request);
     }
 
-    public function hasPingback()
+    public function hasPingback(): bool
     {
         return $this->pingbackCallback !== null;
     }
 
-    public function verifyVote(string $voteUrl, User $user, string $requestIp = '', string $voteKey = null)
+    public function verifyVote(string $voteUrl, User $user, string $ip = '', string $voteKey = null): bool
     {
         $retrieveKeyMethod = $this->retrieveKeyMethod;
         $verificationMethod = $this->verificationMethod;
@@ -178,24 +172,25 @@ class VoteVerifier
         }
 
         try {
-            $ips = $this->getRequestIps($requestIp);
+            $ips = $this->getRequestIps($ip);
 
             if (empty($ips)) {
-                $ips = [$requestIp];
+                $ips = [$ip];
             }
 
-            foreach ($ips as $ip) {
+            foreach ($ips as $userIp) {
                 if ($this->apiUrl === null) {
-                    if ($verificationMethod($ip)) {
+                    if ($verificationMethod($userIp)) {
                         return true;
                     }
+
                     continue;
                 }
 
                 $url = str_replace([
                     '{server}', '{ip}', '{id}', '{name}',
                 ], [
-                    $key, $ip, $user->game_id, $user->name,
+                    $key, $userIp, $user->game_id, $user->name,
                 ], $this->apiUrl);
 
                 $response = Http::get($url);
@@ -211,22 +206,22 @@ class VoteVerifier
         }
     }
 
-    public function requireVerificationKey()
+    public function requireVerificationKey(): bool
     {
         return is_string($this->retrieveKeyMethod);
     }
 
-    public function verificationTypeKey()
+    public function verificationTypeKey(): Closure|string|null
     {
         return $this->retrieveKeyMethod;
     }
 
-    public function getSiteDomain()
+    public function getSiteDomain(): string
     {
         return $this->siteDomain;
     }
 
-    protected function getRequestIps(string $requestIp)
+    protected function getRequestIps(string $requestIp): ?array
     {
         if (! setting('vote.ipv4-v6-compatibility', true)) {
             return null;

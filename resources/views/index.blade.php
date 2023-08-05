@@ -78,7 +78,7 @@
         </div>
     </div>
 
-    @if(display_rewards())
+    @if($displayRewards)
         <div class="card mt-4">
             <div class="card-body">
                 <h2 class="card-title">

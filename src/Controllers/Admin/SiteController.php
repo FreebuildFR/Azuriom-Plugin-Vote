@@ -13,8 +13,6 @@ class SiteController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
@@ -23,8 +21,6 @@ class SiteController extends Controller
 
     /**
      * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
      */
     public function create()
     {
@@ -38,9 +34,6 @@ class SiteController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  \Azuriom\Plugin\Vote\Requests\SiteRequest  $request
-     * @return \Illuminate\Http\Response
      */
     public function store(SiteRequest $request)
     {
@@ -48,24 +41,19 @@ class SiteController extends Controller
 
         $site->rewards()->sync($request->input('rewards', []));
 
-        return redirect()->route('vote.admin.sites.index')
+        return to_route('vote.admin.sites.index')
             ->with('success', trans('messages.status.success'));
     }
 
     /**
      * Show the form for editing the specified resource.
-     *
-     * @param  \Azuriom\Plugin\Vote\Models\Site  $site
-     * @return \Illuminate\Http\Response
      */
     public function edit(Site $site)
     {
-        $checker = app(VoteChecker::class);
-
         return view('vote::admin.sites.edit', [
             'rewards' => Reward::all(),
             'site' => $site->load('rewards'),
-            'sites' => $checker->getSites(),
+            'sites' => app(VoteChecker::class)->getSites(),
         ]);
     }
 
@@ -123,10 +111,6 @@ class SiteController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  \Azuriom\Plugin\Vote\Requests\SiteRequest  $request
-     * @param  \Azuriom\Plugin\Vote\Models\Site  $site
-     * @return \Illuminate\Http\Response
      */
     public function update(SiteRequest $request, Site $site)
     {
@@ -134,23 +118,20 @@ class SiteController extends Controller
 
         $site->rewards()->sync($request->input('rewards', []));
 
-        return redirect()->route('vote.admin.sites.index')
+        return to_route('vote.admin.sites.index')
             ->with('success', trans('messages.status.success'));
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \Azuriom\Plugin\Vote\Models\Site  $site
-     * @return \Illuminate\Http\Response
-     *
-     * @throws \Exception
+     * @throws \LogicException
      */
     public function destroy(Site $site)
     {
         $site->delete();
 
-        return redirect()->route('vote.admin.sites.index')
+        return to_route('vote.admin.sites.index')
             ->with('success', trans('messages.status.success'));
     }
 }

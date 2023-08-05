@@ -14,20 +14,16 @@ class VoteServiceProvider extends BasePluginServiceProvider
 {
     /**
      * Register any plugin services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         //
     }
 
     /**
      * Bootstrap any plugin services.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->loadViews();
 
@@ -57,11 +53,8 @@ class VoteServiceProvider extends BasePluginServiceProvider
 
     /**
      * Define the application's command schedule.
-     *
-     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
-     * @return void
      */
-    protected function schedule(Schedule $schedule)
+    protected function schedule(Schedule $schedule): void
     {
         $schedule->command('vote:rewards')->monthly();
     }
@@ -69,9 +62,9 @@ class VoteServiceProvider extends BasePluginServiceProvider
     /**
      * Returns the routes that should be able to be added to the navbar.
      *
-     * @return array
+     * @return array<string, string
      */
-    protected function routeDescriptions()
+    protected function routeDescriptions(): array
     {
         return [
             'vote.home' => 'vote::messages.title',
@@ -81,9 +74,9 @@ class VoteServiceProvider extends BasePluginServiceProvider
     /**
      * Return the admin navigations routes to register in the dashboard.
      *
-     * @return array
+     * @return array<string, array<string, string>>
      */
-    protected function adminNavigation()
+    protected function adminNavigation(): array
     {
         return [
             'vote' => [

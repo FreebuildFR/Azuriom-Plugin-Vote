@@ -17,8 +17,6 @@ class VoteController extends Controller
 {
     /**
      * Display the vote home page.
-     *
-     * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
@@ -34,6 +32,7 @@ class VoteController extends Controller
             'rewards' => Reward::orderByDesc('chances')->get(),
             'votes' => Vote::getTopVoters(now()->startOfMonth()),
             'ipv6compatibility' => setting('vote.ipv4-v6-compatibility', true),
+            'displayRewards' => (bool) setting('vote.display-rewards', true),
         ]);
     }
 

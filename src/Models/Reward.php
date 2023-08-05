@@ -37,15 +37,13 @@ class Reward extends Model
 
     /**
      * The table prefix associated with the model.
-     *
-     * @var string
      */
-    protected $prefix = 'vote_';
+    protected string $prefix = 'vote_';
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $fillable = [
         'name', 'image', 'chances', 'money', 'commands', 'monthly_rewards', 'need_online', 'is_enabled',
@@ -54,7 +52,7 @@ class Reward extends Model
     /**
      * The attributes that should be cast to native types.
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $casts = [
         'commands' => 'array',
@@ -63,11 +61,11 @@ class Reward extends Model
     ];
 
     /**
-     * The attributes that can be search for.
+     * The attributes that can be used for search.
      *
-     * @var array
+     * @var array<int, string>
      */
-    protected $searchable = [
+    protected array $searchable = [
         'name',
     ];
 
@@ -86,7 +84,7 @@ class Reward extends Model
         return $this->belongsToMany(Server::class, 'vote_reward_server');
     }
 
-    public function dispatch(User|Vote $target)
+    public function dispatch(User|Vote $target): void
     {
         $user = $target instanceof User ? $target : $target->user;
         $siteName = $target instanceof Vote ? $target->site->name : '?';
@@ -116,12 +114,9 @@ class Reward extends Model
 
     /**
      * Scope a query to only include enabled vote rewards.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeEnabled(Builder $query)
+    public function scopeEnabled(Builder $query): void
     {
-        return $query->where('is_enabled', true);
+        $query->where('is_enabled', true);
     }
 }

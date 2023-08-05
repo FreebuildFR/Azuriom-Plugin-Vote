@@ -30,26 +30,24 @@ class Vote extends Model
 
     /**
      * The table prefix associated with the model.
-     *
-     * @var string
      */
-    protected $prefix = 'vote_';
+    protected string $prefix = 'vote_';
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $fillable = [
         'user_id', 'reward_id',
     ];
 
     /**
-     * The attributes that can be search for.
+     * The attributes that can be used for search.
      *
-     * @var array
+     * @var array<int, string>
      */
-    protected $searchable = [
+    protected array $searchable = [
         'site.*', 'reward.*', 'user.name',
     ];
 

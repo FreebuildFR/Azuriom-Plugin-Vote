@@ -12,11 +12,11 @@ class SiteRequest extends FormRequest
     use ConvertCheckbox;
 
     /**
-     * The checkboxes attributes.
+     * The attributes represented by checkboxes.
      *
-     * @var array
+     * @var array<int, string>
      */
-    protected $checkboxes = [
+    protected array $checkboxes = [
         'has_verification',
         'is_enabled',
     ];
@@ -24,9 +24,9 @@ class SiteRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:50'],
@@ -40,39 +40,34 @@ class SiteRequest extends FormRequest
     }
 
     /**
-     * Get data to be validated from the request.
-     *
-     * @return array
+     * Prepare the data for validation.
      */
-    public function validationData()
+    protected function prepareForValidation(): void
     {
-        $url = $this->input('url');
+        $this->mergeCheckboxes();
 
-        if ($url === null) {
-            return $this->all();
+        if ($this->filled('url')) {
+            $this->merge([
+                'url' => Str::replace('{player}', '(player_name)', $this->input('url')),
+            ]);
         }
-
-        return array_merge($this->all(), [
-            'url' => Str::replace('{player}', '(player_name)', $url),
-        ]);
     }
 
     /**
      * Get the validated data from the request.
      *
-     * @param  mixed|null  $key
-     * @param  mixed|null  $default
-     * @return array
-     *
-     * @throws \Illuminate\Validation\ValidationException
+     * @param  array|int|string|null  $key
+     * @param  mixed  $default
+     * @return mixed
      */
     public function validated($key = null, $default = null)
     {
         $validated = $this->validator->validated();
-        $url = Arr::get($validated, 'url');
 
-        return array_merge($validated, [
-            'url' => Str::replace('(player_name)', '{player}', $url),
-        ]);
+        if (($url = Arr::get($validated, 'url')) !== null) {
+            $validated['url'] = Str::replace('(player_name)', '{player}', $url);
+        }
+
+        return data_get($validated, $key, $default);
     }
 }

@@ -10,8 +10,6 @@ class SettingController extends Controller
 {
     /**
      * Display the vote settings page.
-     *
-     * @return \Illuminate\Http\Response
      */
     public function show()
     {
@@ -26,11 +24,6 @@ class SettingController extends Controller
 
     /**
      * Update the settings.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function save(Request $request)
     {
@@ -48,7 +41,7 @@ class SettingController extends Controller
             'vote.commands' => is_array($commands) ? json_encode(array_filter($commands)) : null,
         ]);
 
-        return redirect()->route('vote.admin.settings')
+        return to_route('vote.admin.settings')
             ->with('success', trans('messages.status.success'));
     }
 }

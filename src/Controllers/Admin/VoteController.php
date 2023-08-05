@@ -13,9 +13,6 @@ class VoteController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @param  \Illuminate\Http\Request
-     * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {

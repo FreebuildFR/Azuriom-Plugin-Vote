@@ -16,7 +16,7 @@ class VoteChecker
     /**
      * The votes sites supporting verification.
      *
-     * @var array
+     * @var array<string, VoteVerifier>
      */
     private array $sites = [];
 
@@ -115,17 +115,11 @@ class VoteChecker
             ->requireKey('api_key')
             ->verifyByJson('data.voted', true));
 
-        $this->register(VoteVerifier::for('minecraft-italia.it/')
-            ->setApiUrl('https://api.minecraft-italia.it/v6/server-info/{server_name}?key={server}')
-            ->requireKey('api_key')
+        $this->register(VoteVerifier::for('minecraft-italia.net')
+            ->setApiUrl('https://minecraft-italia.net/lista/api/vote/server?serverId={server}')
+            ->requireKey('server_id')
             ->verifyByCallback(function (Response $response, User $user) {
-                $votes = collect($response->json('userVotes', []));
-
-                if ($user->game_id === null) {
-                    return $votes->contains('minecraftNickname', $user->name);
-                }
-
-                return $votes->contains('minecraftUUID', $user->game_id);
+                return collect($response->json())->contains('username', $user->name);
             }));
 
         $this->register(VoteVerifier::for('minecraft-server.eu')
@@ -216,12 +210,15 @@ class VoteChecker
             }));
     }
 
-    public function hasVerificationForSite(string $domain)
+    public function hasVerificationForSite(string $domain): bool
     {
         return array_key_exists($domain, $this->sites);
     }
 
-    public function getVerificationForSite(string $domain)
+    /**
+     * Get the vote verifier for the given domain.
+     */
+    public function getVerificationForSite(string $domain): ?VoteVerifier
     {
         return $this->sites[$domain] ?? null;
     }
@@ -229,13 +226,8 @@ class VoteChecker
     /**
      * Try to verify if the user voted if the website is supported.
      * In case of failure or unsupported website true is returned.
-     *
-     * @param  Site  $site
-     * @param  \Azuriom\Models\User  $user
-     * @param  string  $requestIp
-     * @return bool
      */
-    public function verifyVote(Site $site, User $user, string $requestIp)
+    public function verifyVote(Site $site, User $user, string $requestIp): bool
     {
         $host = $this->parseHostFromUrl($site->url);
 
@@ -252,12 +244,12 @@ class VoteChecker
         return $verification->verifyVote($site->url, $user, $requestIp, $site->verification_key);
     }
 
-    protected function register(VoteVerifier $verifier)
+    protected function register(VoteVerifier $verifier): void
     {
         $this->sites[$verifier->getSiteDomain()] = $verifier;
     }
 
-    public function parseHostFromUrl(string $rawUrl)
+    public function parseHostFromUrl(string $rawUrl): ?string
     {
         $url = parse_url($rawUrl);
 
@@ -277,9 +269,9 @@ class VoteChecker
     /**
      * Returns the list of registered sites.
      *
-     * @return array
+     * @return array<string, VoteVerifier>
      */
-    public function getSites()
+    public function getSites(): array
     {
         return $this->sites;
     }

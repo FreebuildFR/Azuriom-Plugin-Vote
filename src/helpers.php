@@ -16,9 +16,14 @@ use Illuminate\Support\Facades\Cache;
 */
 
 if (! function_exists('display_rewards')) {
-    function display_rewards()
+    /**
+     * Whether the rewards should be visible on the vote page.
+     *
+     * @deprecated Use the $displayRewards variable in the view.
+     */
+    function display_rewards(): bool
     {
-        return setting('vote.display-rewards', true);
+        return (bool) setting('vote.display-rewards', true);
     }
 }
 
