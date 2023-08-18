@@ -80,8 +80,14 @@ class Site extends Model
 
     public function getRandomReward(): ?Reward
     {
+        $total = $this->rewards->sum('chances');
+
+        if ($total === 0) {
+            return null;
+        }
+
         // Multiply to support decimal chances
-        $random = random_int(1, $this->rewards->sum('chances') * 1000);
+        $random = random_int(1, $total * 1000);
         $sum = 0;
 
         foreach ($this->rewards as $reward) {
