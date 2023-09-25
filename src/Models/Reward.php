@@ -84,7 +84,7 @@ class Reward extends Model
         return $this->belongsToMany(Server::class, 'vote_reward_server');
     }
 
-    public function dispatch(User|Vote $target): void
+    public function dispatch(User|Vote $target, int $serverId = null): void
     {
         $user = $target instanceof User ? $target : $target->user;
         $siteName = $target instanceof Vote ? $target->site->name : '?';
@@ -108,6 +108,10 @@ class Reward extends Model
         ], [$this->name, $siteName], $command), $commands);
 
         foreach ($this->servers as $server) {
+            if ($serverId !== null && $serverId !== $server->id) {
+                continue;
+            }
+
             $server->bridge()->sendCommands($commands, $user, $this->need_online);
         }
     }

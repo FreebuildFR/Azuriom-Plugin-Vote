@@ -29,10 +29,23 @@
             </div>
 
             <div class="@guest d-none @endguest h-100" data-vote-step="2">
+
+                @if (count($serversChoice) > 1)
+                    <select id="stepServerIdInput">
+                        <option></option>
+                        @foreach($serversChoice as $id => $name)
+                            <option value="{{ $id }}">{{ $name }} </option>
+                        @endforeach
+                    </select>
+                @else
+                    <input type="hidden" id="stepServerIdInput" value="{{ array_key_first($serversChoice) }}">
+                @endif
+
                 @forelse($sites as $site)
                     <a class="btn btn-primary" href="{{ $site->url }}" target="_blank" rel="noopener noreferrer"
                        data-vote-id="{{ $site->id }}"
                        data-vote-url="{{ route('vote.vote', $site) }}"
+                       data-server-id='{{ $site->getPublicServerIds() }}'
                        @auth data-vote-time="{{ $site->getNextVoteTime($user, $request)?->valueOf() }}" @endauth>
                         <span class="badge bg-secondary text-white vote-timer"></span> {{ $site->name }}
                     </a>

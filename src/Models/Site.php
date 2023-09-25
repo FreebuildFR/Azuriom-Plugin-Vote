@@ -2,15 +2,18 @@
 
 namespace Azuriom\Plugin\Vote\Models;
 
+use Azuriom\Models\Server;
 use Azuriom\Models\Traits\HasTablePrefix;
 use Azuriom\Models\Traits\Loggable;
 use Azuriom\Models\Traits\Searchable;
 use Azuriom\Models\User;
+use Barryvdh\Debugbar\Facades\Debugbar;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 
 /**
@@ -78,9 +81,39 @@ class Site extends Model
         return $this->hasMany(Vote::class);
     }
 
-    public function getRandomReward(): ?Reward
+    public function getPublicServerIds(): string
     {
-        $total = $this->rewards->sum('chances');
+        $serversIds = [];
+
+        /** @var Reward $reward */
+        foreach ($this->rewards as $reward) {
+            /** @var Server $server */
+            foreach ($reward->servers as $server) {
+                $serversIds[] = (new ServerWrapper($server))->getPublicId();
+            }
+        }
+
+        return json_encode($serversIds);
+    }
+
+    public function getRandomReward(int $server_id = null): ?Reward
+    {
+        $rewards = clone $this->rewards;
+        if ($server_id !== null) {
+            $rewards = $rewards->filter(function (Reward $reward) use ($server_id) {
+                $servers = $reward->servers->filter(function (Server $server) use ($server_id) {
+                    return $server->id === $server_id;
+                });
+
+                if ($servers->isEmpty()) {
+                    return false;
+                }
+
+                return true;
+            });
+        }
+
+        $total = $rewards->sum('chances');
 
         if ($total === 0) {
             return null;
@@ -90,7 +123,7 @@ class Site extends Model
         $random = random_int(1, $total * 1000);
         $sum = 0;
 
-        foreach ($this->rewards as $reward) {
+        foreach ($rewards as $reward) {
             $sum += $reward->chances * 1000;
 
             if ($sum >= $random) {
@@ -98,7 +131,7 @@ class Site extends Model
             }
         }
 
-        return $this->rewards->first();
+        return $rewards->first();
     }
 
     public function getNextVoteTime(User $user, Request|string $ip): ?Carbon

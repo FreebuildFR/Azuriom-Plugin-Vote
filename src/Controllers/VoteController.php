@@ -3,8 +3,10 @@
 namespace Azuriom\Plugin\Vote\Controllers;
 
 use Azuriom\Http\Controllers\Controller;
+use Azuriom\Models\Server;
 use Azuriom\Models\User;
 use Azuriom\Plugin\Vote\Models\Reward;
+use Azuriom\Plugin\Vote\Models\ServerWrapper;
 use Azuriom\Plugin\Vote\Models\Site;
 use Azuriom\Plugin\Vote\Models\Vote;
 use Azuriom\Plugin\Vote\Verification\VoteChecker;
@@ -12,6 +14,7 @@ use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 
 class VoteController extends Controller
 {
@@ -20,11 +23,21 @@ class VoteController extends Controller
      */
     public function index(Request $request)
     {
+        $servers = [];
+
+        /** @var Reward $reward */
+        foreach (Reward::orderByDesc('chances')->get() as $reward) {
+            foreach ($reward->servers as $server) {
+                $servers[(new ServerWrapper($server))->getPublicId()] = $server->name;
+            }
+        }
+
         $queryName = ($gameId = $request->input('uid')) !== null
             ? User::where('game_id', $gameId)->value('name')
             : $request->input('user', '');
 
         return view('vote::index', [
+            'serversChoice' => $servers,
             'name' => $queryName,
             'user' => $request->user(),
             'request' => $request,
@@ -99,7 +112,8 @@ class VoteController extends Controller
         $next = now()->addMinutes($site->vote_delay);
         Cache::put('votes.site.'.$site->id.'.'.$request->ip(), $next, $next);
 
-        $reward = $site->getRandomReward();
+        $serverId = (int) Crypt::decryptString($request->input('server_id'));
+        $reward = $site->getRandomReward($serverId);
 
         if ($reward !== null) {
             $vote = $site->votes()->create([
@@ -107,7 +121,7 @@ class VoteController extends Controller
                 'reward_id' => $reward->id,
             ]);
 
-            $reward->dispatch($vote);
+            $reward->dispatch($vote, $serverId);
         }
 
         return response()->json([
