@@ -36,17 +36,49 @@ class VoteController extends Controller
             ? User::where('game_id', $gameId)->value('name')
             : $request->input('user', '');
 
-        return view('vote::index', [
+        $user = $request->user();
+
+        return view('vote::index', array_merge([
             'serversChoice' => $servers,
-            'name' => $queryName,
-            'user' => $request->user(),
+            'user' => $user,
             'request' => $request,
             'sites' => Site::enabled()->with('rewards')->get(),
             'rewards' => Reward::orderByDesc('chances')->get(),
             'votes' => Vote::getTopVoters(now()->startOfMonth()),
             'ipv6compatibility' => setting('vote.ipv4-v6-compatibility', true),
             'displayRewards' => (bool) setting('vote.display-rewards', true),
-        ]);
+        ], $this->userVoteInfo($user)));
+    }
+
+    private function userVoteInfo(?User $user) {
+        if ($user === null) {
+            return [
+                'totalVotes' => 0,
+                'monthPosition' => 0,
+                'monthVotes' => 0,
+                'avatar' => '',
+                'userName' => ''
+            ];
+        }
+
+        $top = Vote::getTopPosition($user->id, now()->startOfMonth(), null);
+        if ($top['position'] == 0) {
+            $pos = '-';
+        } elseif ($top['position'] == 1) {
+            $pos = '1er/ère';
+        } elseif ($top['position'] == 2) {
+            $pos = '2nd';
+        } else {
+            $pos = $top['position'].'ème';
+        }
+
+        return [
+            'totalVotes' => Vote::countAllVotes($user->id),
+            'monthPosition' => $pos,
+            'monthVotes' => $top['votes'],
+            'avatar' => $user->getAvatar(),
+            'userName' => $user->name
+        ];
     }
 
     public function verifyUser(Request $request, string $name)
@@ -68,9 +100,7 @@ class VoteController extends Controller
                 ];
             });
 
-        return response()->json([
-            'sites' => $sites,
-        ]);
+        return response()->json(array_merge([ 'sites' => $sites ], $this->userVoteInfo($user)));
     }
 
     public function vote()

@@ -120,6 +120,13 @@ function setupVoteTimers(name) {
                 }
             }
 
+            // Set vote profile info
+            document.querySelector('#vote-profile-total-votes > b').innerHTML = response.data.totalVotes;
+            document.querySelector('#vote-profile-month-votes > b').innerHTML = response.data.monthVotes;
+            document.querySelector('#vote-profile-month-position > b').innerHTML = response.data.monthPosition;
+            document.querySelector('#vote-profile-username').innerHTML = response.data.userName;
+            document.querySelector('#vote-profile-avatar > img').src = response.data.avatar;
+
             initVote();
         })
         .catch(function (error) {

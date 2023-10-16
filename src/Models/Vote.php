@@ -91,4 +91,33 @@ class Vote extends Model
             ->take($max ?? setting('vote.top-players-count', 10))
             ->get();
     }
+
+    public static function countAllVotes(int $user_id)
+    {
+        return self::select([DB::raw('count(*) as count')])
+            ->where('user_id', $user_id)
+            ->get()[0]["count"];
+    }
+
+    public static function getTopPosition(int $user_id, Carbon $fromDate, Carbon $toDate = null)
+    {
+        $query = <<<SQL
+            SELECT
+                position,
+                votes
+            FROM (
+                SELECT
+                    user_id,
+                    ROW_NUMBER() OVER(ORDER BY votes DESC) as position,
+                    count(1) as votes
+                FROM vote_votes AS vote_votes
+                WHERE created_at >= ? AND created_at < ?
+                GROUP BY user_id
+                ORDER BY count(1) DESC
+            ) AS vo
+            WHERE user_id = ?
+        SQL;
+        return (array)(DB::select($query, [$fromDate, $toDate ?? now(), $user_id])[0] ?? ['position' => 0, 'votes' => 0]);
+    }
+
 }
